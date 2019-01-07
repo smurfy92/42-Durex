@@ -49,7 +49,7 @@ start:
 
 $(OBJ): $(OBJDIR)%.o: $(SRCDIR)%.c
 	@echo "\033[K$(CY)[DUREX] :$(CE) $(CG)Compiling $<$(CE)";
-	@g++ $(FLAG) -c $< -o $@ $(INC)
+	@gcc $(FLAG) -c $< -o $@ $(INC)
 
 clean: start
 	@echo "$(CY)[DUREX] :$(CE) $(CG)Cleaning Durex objects$(CE)";

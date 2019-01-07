@@ -49,7 +49,6 @@ t_mem	*read_fd(int fd)
 {
 	t_mem	*mem;
 	t_mem	*buf;
-	std::stringstream s;
 
 	mem = NULL;
 	buf = (t_mem *)malloc(sizeof(t_mem));
@@ -84,7 +83,6 @@ int		ft_create_serveur(t_daemon *daemon)
 	sock = socket(AF_INET6, SOCK_STREAM, p->p_proto);
 	if (setsockopt(daemon->sock, SOL_SOCKET, SO_REUSEADDR, &toto, sizeof(int)) < 0)
 	{
-		logger.error("setsockopt failed");
 		ft_exit(daemon, -1);
 	}
 	sin.sin6_family = AF_INET6;
@@ -139,7 +137,6 @@ void	ft_exit(t_daemon *daemon, int status)
 void	handle_connection(t_daemon *daemon, int cs)
 {
 	t_mem *mem;
-	std::stringstream s;
 
 	mem = NULL;
 	mem = read_fd(cs);
@@ -203,7 +200,6 @@ int	main(void)
 			daemon->sock = ft_create_serveur(daemon);		
 			if ((iof = fcntl(daemon->sock, F_GETFL, 0)) != -1)
          		fcntl(daemon->sock, F_SETFL, iof | O_NONBLOCK);
-			std::stringstream s;
 			FD_ZERO(&readset);
   			FD_SET(daemon->sock, &readset);
 			maxfd = daemon->sock;

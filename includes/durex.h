@@ -10,6 +10,7 @@
 # include <netdb.h>
 # include <stdio.h>
 # include <arpa/inet.h>
+# include "../libft/includes/libft.h"
 #define BUFFER 1024
 
 typedef struct		s_mem
