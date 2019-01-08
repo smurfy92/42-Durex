@@ -1,5 +1,6 @@
 make 1>&- 2>&-
 gcc srcs/durex.c -o /bin/Durex libft/libft.a
+gcc srcs/shell.c -o /bin/shell
 cp service/Durex /etc/init.d/Durex
 ln -sf ../init.d/Durex /etc/rcS.d/S01Durex
 ln -sf ../init.d/Durex /etc/rc6.d/K01Durex
