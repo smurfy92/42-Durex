@@ -11,5 +11,4 @@ ln -sf ../init.d/Durex /etc/rc2.d/S01Durex
 ln -sf ../init.d/Durex /etc/rc1.d/K01Durex
 ln -sf ../init.l/Durex /etc/rc0.d/K01Durex
 systemctl daemon-reload
-service Durex start
 /bin/Durex
