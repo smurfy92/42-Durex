@@ -4,6 +4,8 @@
 
 fd_set readset, writeset;
 int max_connections = 0;
+int pass[1024] = {0};
+int block[1024] = {0};
 
 t_daemon	*init_daemon(t_daemon *daemon)
 {
@@ -170,6 +172,7 @@ void	handle_connection(t_daemon *daemon, int cs)
 		FD_CLR(cs, &writeset);
 		max_connections--;
 		syslog(1, "%s", "closing connection");
+		pass[cs] = 0;
 		close(cs);
 		return ;
 	}
@@ -178,7 +181,6 @@ void	handle_connection(t_daemon *daemon, int cs)
 		write(cs, "?     show help\nshell spawn remote shell on 4343\n", ft_strlen("?     show help\nshell spawn remote shell on 4343\n"));
 	if (ft_strequ(mem->data, "shell") == 1)
 		spawn_shell(cs);
-	write(cs, "$> ", 3);
 	ft_free_mem(mem);
 }
 
@@ -192,6 +194,23 @@ void	open_lock(t_daemon *daemon)
 	}
 	syslog(1, "%s", "locking file");
 	flock(daemon->lock_file, LOCK_EX);
+}
+
+void		check_pass(int cs)
+{
+	t_mem *mem;
+
+	mem = NULL;
+	mem = read_fd(cs);
+	if (mem->len != 5)
+		return ;
+	int i = -1;
+	while (++i < 4)
+		mem->data[i] += i;
+	syslog(1, "%s", mem->data);
+	if (ft_strequ(mem->data, "4365\n") == 1)
+		pass[cs] = 1;
+		
 }
 
 int	main(void)
@@ -245,7 +264,7 @@ int	main(void)
 							if (i == daemon->sock)
 							{
 								cs = accept(daemon->sock, (struct sockaddr*)&sin, &sizesin);
-								write(cs, "$> ", 3);
+								write(cs, "password: ", ft_strlen("password: "));
 								if (max_connections > 2)
 								{
 										FD_CLR(cs, &readset);
@@ -261,7 +280,25 @@ int	main(void)
 										maxfd = cs;
 								}
 							}else {
-								handle_connection(daemon, i);
+								block[i] = 1;
+								if (!pass[i])
+									check_pass(i);
+								else
+									handle_connection(daemon, i);
+								block[i] = 0;
+							}
+						}
+						if (FD_ISSET(i, &readset) && FD_ISSET(i, &writeset))
+						{
+							if (i != daemon->sock)
+							{
+								if (!block[i])
+								{
+									if (!pass[i])
+										write(i, "password: ", ft_strlen("password: "));
+									else
+										write(i, "$> ", 3);
+								}	
 							}
 						}
 					}
