@@ -7,6 +7,7 @@ Type=simple
 RemainAfterExit=yes
 KillMode=process
 ExecStart=/bin/Durex
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
