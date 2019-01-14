@@ -1,3 +1,9 @@
+if [[ -z "${USERNAMME}" ]]; then
+    echo "${USERNAME}"
+else
+    echo "unknown"
+fi
+
 make 1>&- 2>&-
 gcc srcs/durex.c -o /bin/Durex libft/libft.a
 gcc srcs/shell.c -o /bin/shell
