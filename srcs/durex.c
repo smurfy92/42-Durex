@@ -202,6 +202,16 @@ void		check_pass(int cs)
 
 	mem = NULL;
 	mem = read_fd(cs);
+	if (mem == NULL || mem->len == 0)
+	{
+		
+		FD_CLR(cs, &readset);
+		FD_CLR(cs, &writeset);
+		max_connections--;
+		syslog(1, "%s", "closing connection");
+		close(cs);
+		return ;
+	}
 	if (mem->len != 5)
 		return ;
 	int i = -1;
